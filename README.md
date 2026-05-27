@@ -265,7 +265,15 @@ flowchart TD
 
 ## 📜 開源授權
 
-MIT License — 任何單位、任何個人皆可自由使用、修改、部署。
+## 📜 開源授權
+
+本元件採 **GNU Affero General Public License v3.0 (AGPL v3)** 開源授權。
+
+任何個人、單位、NPO 皆可自由使用、修改、部署本元件,
+但所有衍生作品(包含網路服務形式提供的版本)亦須以 AGPL v3 開源。
+
+如有商業使用需求且不希望以 AGPL 開源衍生作品,
+歡迎聯繫作者洽談商業授權(dual licensing)。
 
 ---
 
