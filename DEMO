@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>明管 Bright Pipe · 互動式情境 Demo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: #f5ebd8;
+    padding: 1rem;
+    line-height: 1.6;
+  }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  .container { max-width: 700px; margin: 0 auto; }
+  .intro { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 0.5px solid #e8d5b7; }
+  .intro h1 { font-size: 22px; font-weight: 500; margin-bottom: 0.5rem; color: #2d1f0e; }
+  .intro .subtitle { font-size: 14px; color: #8b6f47; margin-bottom: 1rem; }
+  .intro p { font-size: 14px; color: #5a4a2a; margin-bottom: 0.75rem; }
+  .demo-section { margin-bottom: 1.5rem; }
+  .demo-section h2 { font-size: 16px; font-weight: 500; color: #2d1f0e; margin-bottom: 0.5rem; padding-left: 4px; border-left: 3px solid #d85a30; padding-left: 10px; }
+  .demo-section .desc { font-size: 13px; color: #8b6f47; margin-bottom: 0.75rem; padding-left: 14px; }
+
+  /* Demo 2 - 收訊端 */
+  .demo-recipient { background: #fef7ed; border-radius: 12px; padding: 1.25rem; color: #2d1f0e; }
+  .trigger-row { background: #fff; border-radius: 8px; padding: 0.75rem; margin-bottom: 1rem; border: 0.5px solid #e8d5b7; display: flex; align-items: center; gap: 8px; }
+  .trigger-icon { width: 36px; height: 36px; border-radius: 50%; background: #fee; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .trigger-text { flex: 1; }
+  .trigger-text .t1 { font-size: 13px; font-weight: 500; }
+  .trigger-text .t2 { font-size: 11px; color: #8b6f47; }
+  .btn-trigger { background: #d85a30; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .btn-trigger:disabled { opacity: 0.5; }
+  .person-card { background: white; border-radius: 10px; padding: 0.85rem; border: 0.5px solid #e8d5b7; opacity: 0.5; transition: all 0.5s; margin-bottom: 10px; }
+  .person-head { display: flex; align-items: center; gap: 10px; }
+  .person-emoji { font-size: 32px; }
+  .person-info { flex: 1; }
+  .person-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .person-name { font-weight: 500; font-size: 14px; }
+  .person-time { font-size: 10px; color: #8b6f47; font-family: monospace; }
+  .person-sub { font-size: 11px; color: #8b6f47; }
+  .bubble-line { background: #c1e8c1; color: #1a4d1a; border-radius: 12px; border-bottom-left-radius: 4px; }
+  .bubble-sms { background: #d4e8f4; color: #1a3d5c; border-radius: 8px; }
+  .bubble-email { background: #f4e8d4; color: #5c4a1a; border-radius: 8px; }
+  .bubble-call { background: #fde8d4; color: #8b3d10; border-radius: 8px; }
+  .bubble { margin-top: 8px; padding: 8px 12px; font-size: 12px; display: none; }
+  .ack-btn { margin-top: 6px; background: #4a8a4a; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; font-family: inherit; }
+  .status-ok { margin-top: 6px; font-size: 11px; color: #4a8a4a; display: none; }
+  .status-fail { margin-top: 6px; font-size: 11px; color: #c75a30; display: none; }
+  .summary { margin-top: 1rem; padding: 0.85rem; background: white; border-radius: 8px; border: 0.5px solid #e8d5b7; display: none; }
+  .summary-label { font-size: 12px; color: #8b6f47; margin-bottom: 6px; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
+  .summary-quote { margin-top: 10px; padding-top: 10px; border-top: 0.5px dashed #e8d5b7; font-size: 12px; color: #5a4a2a; font-style: italic; }
+  .btn-reset { background: transparent; border: 0.5px solid #e8d5b7; padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; }
+
+  /* Demo 1 - 儀表板 */
+  .demo-dashboard { background: #0e1622; border-radius: 12px; padding: 1.25rem; color: #e8eef5; }
+  .dash-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 0.5px solid #2a3340; }
+  .dash-label { font-size: 11px; color: #6b7a8c; letter-spacing: 0.05em; }
+  .dash-title { font-size: 18px; font-weight: 500; margin-top: 2px; }
+  .dash-clock { font-size: 14px; font-family: monospace; margin-top: 2px; }
+  .station { background: #1a2434; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+  .station-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+  .station-name { font-size: 13px; color: #8da0b8; }
+  .station-addr { font-size: 11px; color: #6b7a8c; }
+  .pill-ok { background: #1a4d3a; color: #5fd9a3; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+  .water-gauge { position: relative; height: 100px; background: #0e1622; border-radius: 6px; overflow: hidden; margin-top: 0.75rem; }
+  .water-line { position: absolute; left: 0; right: 0; border-top: 1px dashed #3a4757; }
+  .water-tag { position: absolute; left: 4px; font-size: 9px; color: #6b7a8c; }
+  .water-fill { position: absolute; left: 0; right: 0; bottom: 0; height: 25%; background: linear-gradient(180deg, #2d7a5c 0%, #1a4d3a 100%); transition: all 0.8s ease; }
+  .water-value { position: absolute; right: 8px; top: 6px; font-size: 14px; font-family: monospace; font-weight: 500; }
+  .log { background: #1a2434; border-radius: 8px; padding: 0.75rem; min-height: 220px; margin-bottom: 1rem; font-size: 13px; }
+  .log-label { color: #6b7a8c; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .log-content { display: flex; flex-direction: column; gap: 8px; }
+  .log-empty { color: #6b7a8c; font-size: 12px; text-align: center; padding: 1.5rem 0; }
+  .log-item { display: flex; gap: 8px; padding: 6px 8px; background: #0e1622; border-radius: 4px; opacity: 0; transition: opacity 0.4s; }
+  .log-time { font-family: monospace; font-size: 11px; flex-shrink: 0; }
+  .log-text { color: #d8e0ea; font-size: 12px; }
+  .btn-row { display: flex; gap: 8px; margin-bottom: 0.75rem; }
+  .btn-play { flex: 1; background: #e24b4a; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .btn-dash-reset { background: transparent; color: #8da0b8; border: 0.5px solid #2a3340; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .export-row { display: none; padding-top: 0.75rem; border-top: 0.5px solid #2a3340; }
+  .export-label { font-size: 11px; color: #6b7a8c; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .export-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .export-btn { background: #1a2434; color: #8da0b8; border: 0.5px solid #2a3340; padding: 6px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-family: inherit; }
+  .export-preview { background: #0e1622; padding: 0.75rem; border-radius: 6px; font-size: 10px; color: #5fd9a3; margin-top: 0.5rem; overflow-x: auto; max-height: 120px; display: none; white-space: pre-wrap; font-family: monospace; }
+
+  .footer { text-align: center; margin-top: 2rem; padding: 1rem; font-size: 12px; color: #8b6f47; }
+  .footer a { color: #d85a30; text-decoration: none; }
+</style>
+</head>
+<body>
+<h2 class="sr-only">明管 Bright Pipe 互動式 Demo,展示水情訊號從感測、AI 處理、多通道推播到抵達確認的完整流程。</h2>
+
+<div class="container">
+
+<div class="intro">
+<h1>明管 Bright Pipe · 互動式情境 Demo</h1>
+<div class="subtitle">Sewer Status Event Bridge · 防災積木元件創新賽 2026</div>
+<p>半夜下大雨,水溝快滿了。系統要叫醒誰?用什麼方式?沒收到怎麼辦?</p>
+<p>下面兩個 Demo 講同一個故事,但視角不同。第一個是「<b>誰收到訊息</b>」(任何人看都懂);第二個是「<b>系統怎麼運作</b>」(技術視角)。</p>
+</div>
+
+<div class="demo-section">
+<h2>Demo 1 · 收訊端視角</h2>
+<div class="desc">給家人、長官、決賽現場觀眾看 — 看見「人」</div>
+
+<div class="demo-recipient">
+<div style="text-align: center; margin-bottom: 1rem;">
+<div style="font-size: 11px; color: #8b6f47; letter-spacing: 0.1em; margin-bottom: 4px;">凌晨 02:45 · 大雨中</div>
+<div style="font-size: 18px; font-weight: 500;">水溝快滿了,訊息怎麼到他們手上?</div>
+</div>
+
+<div class="trigger-row">
+<div class="trigger-icon">📡</div>
+<div class="trigger-text">
+<div class="t1">系統偵測:四湖鄉中山東路水溝水位異常</div>
+<div class="t2">該通知:里長 · 值班人員 · 公所 · 在地長輩</div>
+</div>
+<button class="btn-trigger" id="trigger-btn" onclick="trigger()">▶ 開始發送</button>
+</div>
+
+<div class="person-card" id="p1">
+<div class="person-head">
+<div class="person-emoji">👨‍🦰</div>
+<div class="person-info">
+<div class="person-row"><div class="person-name">王里長 (45 歲)</div><div class="person-time">02:45:18</div></div>
+<div class="person-sub">習慣用 LINE,睡前還會看</div>
+</div>
+</div>
+<div class="bubble bubble-line" id="p1-bubble">
+📲 <b>LINE:</b>四湖 05 站積水中,請查看是否需要疏散沿線商家。<br>
+<button class="ack-btn" id="p1-ack" onclick="confirmReceived('p1')">✓ 我已收到</button>
+</div>
+<div class="status-ok" id="p1-status">✅ 02:46:12 已確認收到</div>
+</div>
+
+<div class="person-card" id="p2">
+<div class="person-head">
+<div class="person-emoji">👮</div>
+<div class="person-info">
+<div class="person-row"><div class="person-name">值班阿明 (30 歲)</div><div class="person-time">02:45:25</div></div>
+<div class="person-sub">值班中,手機開靜音但有來電響</div>
+</div>
+</div>
+<div class="bubble bubble-sms" id="p2-bubble">
+✉️ <b>SMS:</b>【明管警報】四湖 05 站 02:45 溢出,請至儀表板查看。回 1 確認。
+</div>
+<div class="status-ok" id="p2-status">✅ 02:45:58 已回覆「1」確認收到</div>
+</div>
+
+<div class="person-card" id="p3">
+<div class="person-head">
+<div class="person-emoji">🏛</div>
+<div class="person-info">
+<div class="person-row"><div class="person-name">四湖鄉公所災防窗口</div><div class="person-time">02:45:32</div></div>
+<div class="person-sub">辦公室 24 小時值班,看 Email</div>
+</div>
+</div>
+<div class="bubble bubble-email" id="p3-bubble">
+📧 <b>Email:</b>四湖 05 站事件 evt_4hu05_20260601_024500,可一鍵匯出至 EMIC 回報應變中心。
+</div>
+<div class="status-ok" id="p3-status">✅ 02:46:30 已開啟 Email</div>
+</div>
+
+<div class="person-card" id="p4">
+<div class="person-head">
+<div class="person-emoji">🧓</div>
+<div class="person-info">
+<div class="person-row"><div class="person-name">李老伯 (82 歲)</div><div class="person-time">02:45:18</div></div>
+<div class="person-sub">住低窪地、沒在用 LINE</div>
+</div>
+</div>
+<div class="bubble bubble-line" id="p4-bubble">
+📲 <b>LINE 發給女兒:</b>父親住址附近水溝溢出,請致電關心。
+</div>
+<div class="status-fail" id="p4-failed">⏱ 等了 5 分鐘女兒沒看 LINE...</div>
+<div class="bubble bubble-call" id="p4-escalate" style="display: none;">
+📞 <b>系統升級:自動播電話給隔壁陳太太</b><br>
+"喂,陳太太嗎?系統來電,您隔壁李伯伯家門前水溝溢出,麻煩您去敲門看看好嗎?"
+</div>
+<div class="status-ok" id="p4-status">✅ 02:51:08 陳太太回報:已通知李伯伯</div>
+</div>
+
+<div class="summary" id="summary">
+<div class="summary-label">這次警報的結果</div>
+<div class="summary-grid">
+<div>✅ 4 人收到:王里長、阿明、公所、李伯伯</div>
+<div>📞 1 人靠鄰居:李伯伯透過陳太太</div>
+<div>⏱ 平均收到時間:33 秒</div>
+<div>💡 0 人漏接</div>
+</div>
+<div class="summary-quote">
+"訊息有沒有發出去" ≠ "訊息有沒有真的到他們手上"<br>
+明管 Bright Pipe 解決的是後者。
+</div>
+</div>
+
+<div style="text-align: center; margin-top: 0.75rem;">
+<button class="btn-reset" onclick="resetAll()" style="color: #8b6f47;">重新看一次</button>
+</div>
+</div>
+</div>
+
+<div class="demo-section">
+<h2>Demo 2 · 系統儀表板視角</h2>
+<div class="desc">給評審、值班同行看 — 看見技術真的能跑</div>
+
+<div class="demo-dashboard">
+<div class="dash-head">
+<div>
+<div class="dash-label">SEWER STATUS BRIDGE</div>
+<div class="dash-title">明管 Bright Pipe</div>
+</div>
+<div style="text-align: right;">
+<div class="dash-label">值班儀表 · 雲林縣</div>
+<div class="dash-clock" id="clock">02:42:30</div>
+</div>
+</div>
+
+<div class="station">
+<div class="station-head">
+<div>
+<div class="station-name">四湖 05 站</div>
+<div class="station-addr">四湖鄉中山東路、中華電信</div>
+</div>
+<div class="pill-ok" id="status-pill">● 半滿管</div>
+</div>
+<div class="water-gauge">
+<div class="water-line" style="top: 30%;"></div>
+<div class="water-line" style="top: 65%;"></div>
+<div class="water-tag" style="top: calc(30% - 8px);">滿管線</div>
+<div class="water-tag" style="top: calc(65% - 8px);">半滿線</div>
+<div class="water-fill" id="water-fill"></div>
+<div class="water-value" id="water-value">0.42 m</div>
+</div>
+</div>
+
+<div class="log" id="event-log">
+<div class="log-label">系統事件紀錄</div>
+<div class="log-content" id="log-content">
+<div class="log-empty" id="log-empty">按下播放,看半夜這 15 分鐘內,系統做了什麼</div>
+</div>
+</div>
+
+<div class="btn-row">
+<button class="btn-play" id="play-btn" onclick="startDemo()">▶ 播放半夜這場雨</button>
+<button class="btn-dash-reset" onclick="resetDemo(true)">重來</button>
+</div>
+
+<div class="export-row" id="export-row">
+<div class="export-label">同一筆事件 · 多元格式匯出</div>
+<div class="export-btns">
+<button class="export-btn" onclick="showExport('EMIC')">EMIC 格式</button>
+<button class="export-btn" onclick="showExport('CAP')">CAP 協定</button>
+<button class="export-btn" onclick="showExport('CSV')">CSV 表格</button>
+<button class="export-btn" onclick="showExport('JSON')">JSON</button>
+</div>
+<pre class="export-preview" id="export-preview"></pre>
+</div>
+</div>
+</div>
+
+<div class="footer">
+明管 Bright Pipe · <a href="https://github.com/" id="repo-link">GitHub Repository</a> · AGPL v3<br>
+這份 Demo 為 README 之延伸,真實 MVP 程式碼開發中
+</div>
+
+</div>
+
+<script>
+// =========== Demo 1: 收訊端 ===========
+let demo1Timeouts = [];
+
+function trigger() {
+  document.getElementById('trigger-btn').disabled = true;
+  document.getElementById('trigger-btn').innerText = '發送中...';
+
+  demo1Timeouts.push(setTimeout(() => {
+    document.getElementById('p1').style.opacity = '1';
+    document.getElementById('p1-bubble').style.display = 'block';
+  }, 500));
+  demo1Timeouts.push(setTimeout(() => {
+    document.getElementById('p2').style.opacity = '1';
+    document.getElementById('p2-bubble').style.display = 'block';
+  }, 1500));
+  demo1Timeouts.push(setTimeout(() => {
+    document.getElementById('p3').style.opacity = '1';
+    document.getElementById('p3-bubble').style.display = 'block';
+  }, 2500));
+  demo1Timeouts.push(setTimeout(() => {
+    document.getElementById('p4').style.opacity = '1';
+    document.getElementById('p4-bubble').style.display = 'block';
+  }, 3500));
+  demo1Timeouts.push(setTimeout(() => {
+    document.getElementById('p2-status').style.display = 'block';
+  }, 4500));
+  demo1Timeouts.push(setTimeout(() => {
+    document.getElementById('p3-status').style.display = 'block';
+  }, 5500));
+  demo1Timeouts.push(setTimeout(() => {
+    document.getElementById('p4-failed').style.display = 'block';
+    document.getElementById('p4').style.borderColor = '#d85a30';
+  }, 6500));
+  demo1Timeouts.push(setTimeout(() => {
+    document.getElementById('p4-escalate').style.display = 'block';
+  }, 7800));
+  demo1Timeouts.push(setTimeout(() => {
+    document.getElementById('p4-status').style.display = 'block';
+    document.getElementById('p4').style.borderColor = '#4a8a4a';
+  }, 9500));
+  demo1Timeouts.push(setTimeout(() => {
+    document.getElementById('summary').style.display = 'block';
+    document.getElementById('trigger-btn').innerText = '✓ 全部送達';
+  }, 10500));
+}
+
+function confirmReceived(id) {
+  document.getElementById(id + '-ack').style.display = 'none';
+  document.getElementById(id + '-status').style.display = 'block';
+}
+
+function resetAll() {
+  demo1Timeouts.forEach(t => clearTimeout(t));
+  demo1Timeouts = [];
+  ['p1','p2','p3','p4'].forEach(id => {
+    document.getElementById(id).style.opacity = '0.5';
+    document.getElementById(id).style.borderColor = '#e8d5b7';
+    document.getElementById(id + '-bubble').style.display = 'none';
+    const status = document.getElementById(id + '-status');
+    if (status) status.style.display = 'none';
+  });
+  document.getElementById('p1-ack').style.display = 'inline-block';
+  document.getElementById('p4-failed').style.display = 'none';
+  document.getElementById('p4-escalate').style.display = 'none';
+  document.getElementById('summary').style.display = 'none';
+  document.getElementById('trigger-btn').disabled = false;
+  document.getElementById('trigger-btn').innerText = '▶ 開始發送';
+}
+
+// =========== Demo 2: 儀表板 ===========
+let demo2Timeouts = [];
+let playing = false;
+
+const events = [
+  { t: 1000, clock: "02:43:00", log: { type: "data", text: "📡 GAS Time Trigger 啟動 · 拉取水利署 IoW OpenData" } },
+  { t: 2500, clock: "02:43:15", log: { type: "data", text: "🔍 比對:上次 0.42m(綠) → 這次 0.58m(綠) · 無變化" } },
+  { t: 4000, clock: "02:45:00", water: 0.45, level: "watch", log: { type: "warn", text: "⚡ 比對:0.58m → 1.12m,跨越「滿管」閾值" } },
+  { t: 5500, clock: "02:45:05", log: { type: "event", text: "📦 生成事件物件 evt_4hu05_20260601_024500 · 寫入 Sheets" } },
+  { t: 7000, clock: "02:45:08", log: { type: "ai", text: "🤖 AI 守門員:對照鄰近三站 + 雨量趨勢 → 信心 92(真警報)" } },
+  { t: 8500, clock: "02:45:12", log: { type: "ai", text: "🤖 AI 分流員:該里里長(LINE)+ 值班人員(SMS)+ 鎮公所(Email)" } },
+  { t: 10000, clock: "02:45:15", log: { type: "ai", text: "🤖 AI 改寫員:里長版「四湖 05 站積水中,請查看」(口語)" } },
+  { t: 11500, clock: "02:45:18", log: { type: "push", text: "📲 LINE → 王里長 · 已發送" } },
+  { t: 13000, clock: "02:45:25", log: { type: "push", text: "📲 SMS → 值班人員 · 已發送" } },
+  { t: 14500, clock: "02:45:32", log: { type: "push", text: "📲 Email → 鎮公所災防窗口 · 已發送" } },
+  { t: 16000, clock: "02:48:00", water: 0.7, level: "critical", log: { type: "alert", text: "🔴 跨越「溢出路面」閾值 · 自動升級事件等級" } },
+  { t: 17500, clock: "02:50:00", log: { type: "check", text: "⏱ 抵達確認:值班人員已按「收到」(02:46:12)" } },
+  { t: 19000, clock: "02:50:30", log: { type: "fallback", text: "⚠️ 王里長未在 5 分鐘內回應 → 自動升級電話通知" } },
+  { t: 20500, clock: "02:51:00", log: { type: "done", text: "✅ 全部抵達確認完成 · 事件納入單一真相紀錄" } },
+];
+
+function startDemo() {
+  if (playing) return;
+  playing = true;
+  resetDemo(false);
+  document.getElementById('play-btn').innerText = '▶ 播放中...';
+  document.getElementById('play-btn').style.opacity = '0.6';
+  const logEmpty = document.getElementById('log-empty');
+  if (logEmpty) logEmpty.remove();
+
+  events.forEach((e) => {
+    const id = setTimeout(() => applyEvent(e), e.t);
+    demo2Timeouts.push(id);
+  });
+
+  const finalId = setTimeout(() => {
+    document.getElementById('play-btn').innerText = '✓ 完成,可重來';
+    document.getElementById('play-btn').style.opacity = '1';
+    document.getElementById('export-row').style.display = 'block';
+    playing = false;
+  }, 22000);
+  demo2Timeouts.push(finalId);
+}
+
+function applyEvent(e) {
+  if (e.clock) document.getElementById('clock').innerText = e.clock;
+
+  if (e.water !== undefined) {
+    document.getElementById('water-fill').style.height = (e.water * 100) + '%';
+    document.getElementById('water-value').innerText = (e.water * 2.5).toFixed(2) + ' m';
+    if (e.level === 'watch') {
+      document.getElementById('water-fill').style.background = 'linear-gradient(180deg, #ba7517 0%, #854f0b 100%)';
+      const pill = document.getElementById('status-pill');
+      pill.innerText = '● 滿管';
+      pill.style.background = '#3d2a0a';
+      pill.style.color = '#f5c842';
+    }
+    if (e.level === 'critical') {
+      document.getElementById('water-fill').style.background = 'linear-gradient(180deg, #e24b4a 0%, #791f1f 100%)';
+      const pill = document.getElementById('status-pill');
+      pill.innerText = '● 溢出路面';
+      pill.style.background = '#4d1a1a';
+      pill.style.color = '#ff7a7a';
+    }
+  }
+
+  if (e.log) {
+    const colors = {
+      data: '#6b7a8c', warn: '#f5c842', event: '#7fb3f0', ai: '#c79df0',
+      push: '#5fd9a3', alert: '#ff7a7a', check: '#5fd9a3', fallback: '#f5c842', done: '#5fd9a3'
+    };
+    const item = document.createElement('div');
+    item.className = 'log-item';
+    item.style.borderLeft = '2px solid ' + colors[e.log.type];
+    const time = document.createElement('span');
+    time.className = 'log-time';
+    time.style.color = colors[e.log.type];
+    time.innerText = document.getElementById('clock').innerText;
+    const text = document.createElement('span');
+    text.className = 'log-text';
+    text.innerText = e.log.text;
+    item.appendChild(time);
+    item.appendChild(text);
+    document.getElementById('log-content').appendChild(item);
+    requestAnimationFrame(() => { item.style.opacity = '1'; });
+    document.getElementById('event-log').scrollTop = 99999;
+  }
+}
+
+function resetDemo(full) {
+  demo2Timeouts.forEach(t => clearTimeout(t));
+  demo2Timeouts = [];
+  playing = false;
+  document.getElementById('clock').innerText = '02:42:30';
+  document.getElementById('water-fill').style.height = '25%';
+  document.getElementById('water-fill').style.background = 'linear-gradient(180deg, #2d7a5c 0%, #1a4d3a 100%)';
+  document.getElementById('water-value').innerText = '0.42 m';
+  const pill = document.getElementById('status-pill');
+  pill.innerText = '● 半滿管';
+  pill.style.background = '#1a4d3a';
+  pill.style.color = '#5fd9a3';
+  if (full !== false) {
+    document.getElementById('log-content').innerHTML = '<div class="log-empty" id="log-empty">按下播放,看半夜這 15 分鐘內,系統做了什麼</div>';
+    document.getElementById('export-row').style.display = 'none';
+    document.getElementById('export-preview').style.display = 'none';
+    document.getElementById('play-btn').innerText = '▶ 播放半夜這場雨';
+    document.getElementById('play-btn').style.opacity = '1';
+  }
+}
+
+function showExport(format) {
+  const samples = {
+    EMIC: '<EMICEvent>\n  <EventID>evt_4hu05_20260601_024500</EventID>\n  <Station>四湖05</Station>\n  <Level>CRITICAL</Level>\n  <Timestamp>2026-06-01T02:48:00+08</Timestamp>\n  <ReportTo>雲林縣政府災害應變中心</ReportTo>\n</EMICEvent>',
+    CAP: '{\n  "identifier": "evt_4hu05_20260601_024500",\n  "sender": "bright-pipe@civictech.tw",\n  "category": "Met",\n  "urgency": "Immediate",\n  "severity": "Severe",\n  "headline": "四湖鄉雨水下水道溢出路面"\n}',
+    CSV: '事件編號,站點,時間,狀態,水位\nevt_4hu05_20260601_024500,四湖05,02:48:00,溢出路面,1.75m',
+    JSON: '{\n  "event_id": "evt_4hu05_20260601_024500",\n  "station": "四湖05",\n  "change": "watch → critical",\n  "value": 1.75,\n  "unit": "m",\n  "ai_confidence": 92\n}'
+  };
+  const el = document.getElementById('export-preview');
+  el.innerText = samples[format];
+  el.style.display = 'block';
+}
+</script>
+</body>
+</html>
