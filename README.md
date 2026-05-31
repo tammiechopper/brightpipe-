@@ -3,6 +3,17 @@
 > 不取代任何系統,只擔任訊號的橋樑。
 > 從感測器到客廳,讓水情訊號真的抵達該抵達的人。
 
+## 🎬 互動式 Demo
+
+👉 **[點此體驗線上 Demo](https://tammiechopper.github.io/brightpipe-/demo.html)** 👈
+
+兩個 Demo 講同一個故事,但視角不同:
+
+- **Demo 1(收訊端視角)** — 看訊息如何送達王里長、值班人員、不會用 LINE 的李老伯
+- **Demo 2(系統視角)** — 看 GAS Trigger、AI 三 Agent、EMIC/CAP/CSV 多元匯出
+
+---
+
 **Civic Tech Taiwan 2026 防災積木元件創新賽** 參賽作品
 團隊:明管 Bright Pipe
 
@@ -262,8 +273,6 @@ flowchart TD
 - 馬太鞍溪堰塞湖事件相關公開報導(2025/9)
 
 ---
-
-## 📜 開源授權
 
 ## 📜 開源授權
 
