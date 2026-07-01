@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>明管 Bright Pipe</title>
+
+<style>
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif;
+  background:#f5ebd8;
+  margin:0;
+  padding:20px;
+  color:#2d1f0e;
+}
+
+.container{
+  max-width:900px;
+  margin:auto;
+}
+
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:16px;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.brand{
+  font-size:24px;
+  font-weight:700;
+}
+
+.time{
+  color:#8b6f47;
+  font-size:14px;
+}
+
+.urgent{
+  background:linear-gradient(135deg,#d85a30,#b34020);
+  color:#fff;
+}
+
+.urgent h2{
+  margin:0 0 10px;
+}
+
+.btn{
+  border:none;
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-right:8px;
+}
+
+.btn-white{
+  background:#fff;
+  color:#b34020;
+}
+
+.stats{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.stat{
+  background:#fff;
+  padding:16px;
+  border-radius:12px;
+  min-width:120px;
+  text-align:center;
+}
+
+.number{
+  font-size:28px;
+  font-weight:bold;
+}
+
+.yellow{
+  color:#d4a017;
+}
+
+.red{
+  color:#d85a30;
+}
+
+.station{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid #eee;
+}
+
+.station:last-child{
+  border-bottom:none;
+}
+
+.dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  display:inline-block;
+  margin-right:8px;
+}
+
+.green-bg{
+  background:#4a8a4a;
+}
+
+.yellow-bg{
+  background:#d4a017;
+}
+
+.red-bg{
+  background:#d85a30;
+}
+
+#stationList{
+  max-height:300px;
+  overflow:auto;
+}
+
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#222;
+  color:#fff;
+  padding:12px 20px;
+  border-radius:10px;
+  opacity:0;
+  transition:.3s;
+}
+
+.toast.show{
+  opacity:1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="top">
+    <div class="brand">
+      明管 Bright Pipe
+    </div>
+
+    <div class="time" id="now-time">
+      --
+    </div>
+  </div>
+
+  <div class="card urgent">
+    <h2>🚨 最緊急事件</h2>
+
+    <p>四湖05站 · 溢出路面</p>
+    <p>AI信心：92%</p>
+
+    <br>
+
+     </div>
+
+  <div class="card">
+
+    <h3>📊 全縣監測概況</h3>
+
+    <br>
+
+    <div class="stats">
+
+      <div class="stat">
+        <div class="number"
+             id="totalStations">
+          0
+        </div>
+        總站數
+      </div>
+
+      <div class="stat">
+        <div class="number yellow"
+             id="warningStations">
+          0
+        </div>
+        注意
+      </div>
+
+      <div class="stat">
+        <div class="number red"
+             id="criticalStations">
+          0
+        </div>
+        警戒
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card">
+
+    <h3>📍 各站詳細資料</h3>
+
+    <br>
+
+    <div id="stationList">
+      載入中...
+    </div>
+
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+
+function toast(msg){
+  const t =
+    document.getElementById('toast');
+
+  t.innerText = msg;
+  t.classList.add('show');
+
+  setTimeout(()=>{
+    t.classList.remove('show');
+  },2500);
+}
+
+function updateTime(){
+
+  const d = new Date();
+
+  const s =
+    d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0') + ' ' +
+    String(d.getHours()).padStart(2,'0') + ':' +
+    String(d.getMinutes()).padStart(2,'0');
+
+  document.getElementById(
+    'now-time'
+  ).innerText = s;
+}
+
+updateTime();
+setInterval(updateTime,30000);
+
+google.script.run
+  .withSuccessHandler(showData)
+  .withFailureHandler(function(err){
+    console.error(err);
+    alert('取得資料失敗');
+  })
+  .getDashboardData();
+
+function showData(data){
+
+  console.log(data);
+
+  document.getElementById(
+    'totalStations'
+  ).innerText =
+    data.total;
+
+  document.getElementById(
+    'warningStations'
+  ).innerText =
+    data.warning;
+
+  document.getElementById(
+    'criticalStations'
+  ).innerText =
+    data.critical;
+
+  function sendAlert(){
+  google.script.run
+    .withSuccessHandler(function(data){
+      toast('📲 已通知 ' + data.receivers.length + ' 位對象');
+      console.log(data);
+    })
+    .withFailureHandler(function(err){
+      console.error(err);
+      alert('後端錯誤:' + err.message);
+    })
+    .sendTestAlert();
+}
+  let html = '';
+
+  data.stations.forEach(s=>{
+
+    let color = 'green-bg';
+
+    const level =
+      parseFloat(s.waterlevel || 0);
+
+    if(level >= 1.5){
+      color = 'red-bg';
+    }
+    else if(level >= 1){
+      color = 'yellow-bg';
+    }
+
+    html += `
+      <div class="station">
+        <div>
+          <span class="dot ${color}"></span>
+          ${s.stationid}
+        </div>
+
+        <div>
+          ${s.waterlevel} m
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById(
+    'stationList'
+  ).innerHTML = html;
+}
+
+</script>
+
+</body>
+</html>
+<button
+<button class="btn btn-white"
+  onclick="sendAlert()">
+  一鍵推播4對象
+</button>
+
+function sendAlert(){
+
+  google.script.run
+    .withSuccessHandler(function(data){
+
+      toast(
+        '📲 已通知 '
+        + data.receivers.length
+        + ' 位對象'
+      );
+
+      console.log(data);
+
+    })
+    .sendTestAlert();
+
+}
