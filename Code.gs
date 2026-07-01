@@ -197,13 +197,13 @@ function markAck() {
   return null;
 }
 // ===== Telegram 設定 =====
-const TG_TOKEN = '8883827760:AAGGHfzP3J_AMZ3bB35TbNbkKEAgj0J2Uss';   // ← 換新 token 貼這,不要貼給別人
+const TG_TOKEN = ;   // ← 換新 token 貼這,不要貼給別人
 
 const TARGETS = [
-  { channel:'Telegram', recipient:'四湖里里長',   role:'地方',     chatId:'8958874271' },
-  { channel:'Telegram', recipient:'下水道科值班', role:'主管機關', chatId:'8958874271' },
-  { channel:'Telegram', recipient:'清潔隊分隊',   role:'現場處置', chatId:'8958874271' },
-  { channel:'Telegram', recipient:'在地防災志工', role:'疏散協助', chatId:'8958874271' }
+  { channel:'Telegram', recipient:'四湖里里長',   role:'地方',     chatId:'' },
+  { channel:'Telegram', recipient:'下水道科值班', role:'主管機關', chatId:'' },
+  { channel:'Telegram', recipient:'清潔隊分隊',   role:'現場處置', chatId:'' },
+  { channel:'Telegram', recipient:'在地防災志工', role:'疏散協助', chatId:'' }
 ];
 
 // 真正打 Telegram
