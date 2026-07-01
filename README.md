@@ -147,7 +147,7 @@ flowchart TD
         O2[CAP 協定]
         O3[CSV/Excel]
         O4[OpenAPI/Webhook]
-        O5[LINE/Email/SMS]
+        O5[telegram/Email/SMS]
         O6[公開狀態頁]
     end
 
@@ -238,7 +238,7 @@ flowchart TD
 - **Google Sheets** — 事件記錄、抵達追蹤、單一真相來源
 - **Gemini API** — 三個 AI Agent
 - **HTML** — 設定介面、公開狀態頁
-- **LINE Notify API** — 主要推播管道
+- **Telegram** — 主要推播管道
 - **Email / SMS Gateway** — 備援推播管道
 
 ---
